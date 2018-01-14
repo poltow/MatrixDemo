@@ -32,22 +32,24 @@ class AAAMatrix(ControlSurface):
             self._session_A = None
             self._session_B = None
             self._highlight_counter = 0
+            self._link_button = None
             
             Live.Base.log("LOG: AAAMatrix _session" + str(self._session ))
-            Live.Base.log("LOG: AAAMatrix _session_B" + str(self._session_B ))
+            Live.Base.log("LOG: AAAMatrix _session_A" + str(self._session_A ))
             Live.Base.log("LOG: AAAMatrix _session_B" + str(self._session_B ))
             self._setup_session_control(clip_A_notes,control_A,0,0, 'A')    
             self._session_A = self._session
             
             Live.Base.log("LOG: AAAMatrix _session" + str(self._session ))
-            Live.Base.log("LOG: AAAMatrix _session_B" + str(self._session_B ))
+            Live.Base.log("LOG: AAAMatrix _session_A" + str(self._session_A ))
             Live.Base.log("LOG: AAAMatrix _session_B" + str(self._session_B )) 
-            self._setup_session_control(clip_B_notes, control_B,2,0,'B')
+            self._setup_session_control(clip_B_notes, control_B,0,2,'B')
                     
             self._session_B = self._session                    
             Live.Base.log("LOG: AAAMatrix _session" + str(self._session ))
+            Live.Base.log("LOG: AAAMatrix _session_A" + str(self._session_A ))
             Live.Base.log("LOG: AAAMatrix _session_B" + str(self._session_B ))
-            Live.Base.log("LOG: AAAMatrix _session_B" + str(self._session_B ))
+            self.set_link_button(ButtonElement(False, MIDI_CC_TYPE, CHANNEL, 93))
             self._set_suppress_features(False) 
             
         
@@ -104,22 +106,40 @@ class AAAMatrix(ControlSurface):
     def update_display(self):
         self._highlight_counter += 1
         if(self._session_A != None and self._session_B != None):
-            if(self._highlight_counter ==3):
-                Live.Base.log("LOG: AAAMatrix _session_A")
+            if(self._highlight_counter ==2):
                 self.set_highlighting_session_component(self._session_A)
-                self._session_A.set_show_highlight(True)
-                self._session_B.set_show_highlight(False)
-            elif(self._highlight_counter >6):
-                Live.Base.log("LOG: AAAMatrix _session_B")
+            elif(self._highlight_counter ==4):
                 self._highlight_counter = 0 
                 self.set_highlighting_session_component(self._session_B)
-                self._session_A.set_show_highlight(False)
-                self._session_B.set_show_highlight(True)
            
+    def set_link_button(self, link_button):
+        assert (isinstance(link_button, (ButtonElement, type(None))))
+        if link_button != self._link_button:
+            if self._link_button != None:
+                self._link_button.remove_value_listener(self._link_value)
+            self._link_button = link_button
+            if self._link_button != None: 
+                self._link_button.add_value_listener(self._link_value)
+        self.update()
+
+    def _link_value(self, value):
+        assert (self._link_button != None)
+        assert (value in range(128))
+        if(self._session_A != None and self._session_B != None):
+            if (value >0):
+                self._session_A._link()
+                self._session_B._link()
+            else:
+                self._session_A._unlink()
+                self._session_B._unlink()
+                   
     # Close script
     def disconnect(self):
         Live.Base.log("LOG: AAAMatrix disconnect")
         """clean things up on disconnect"""
+        if self._link_button != None:
+            self._link_button.remove_value_listener(self._link_value)
+            self._link_button = None
         ControlSurface.disconnect(self)
         return None
     

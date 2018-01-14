@@ -133,6 +133,7 @@ _reassign_scenes(self)
 _reassign_tracks(self)
 _on_fired_slot_index_changed(self, index)
 
+#Can Link several Sessions (
 _is_linked(self)
 _link(self)
 _unlink(self)
