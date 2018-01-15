@@ -5,14 +5,15 @@ import Live
 from _Framework.ButtonElement import ButtonElement 
 from _Framework.ButtonMatrixElement import ButtonMatrixElement
 from _Framework.ControlSurface import ControlSurface
-from _Framework.InputControlElement import MIDI_CC_TYPE, MIDI_NOTE_TYPE
+from _Framework.InputControlElement import MIDI_CC_TYPE
 from consts import *
-from _Framework.SessionComponent import SessionComponent 
+from CustomSessionComponent import CustomSessionComponent
 
 
 ###############################################
 # Main Script to Configure Red Box and Buttons
 # (Not Necessary to edit below here)
+
 
 class AAAMatrix(ControlSurface):
     __module__ = __name__
@@ -37,7 +38,7 @@ class AAAMatrix(ControlSurface):
         is_momentary = True
 
         # Set Highlight Grid Size
-        session = SessionComponent(num_tracks, num_scenes)
+        session = CustomSessionComponent(num_tracks, num_scenes)
 
         # Set Session Name
         session.name = 'AAAMatrix Session'
@@ -45,34 +46,49 @@ class AAAMatrix(ControlSurface):
         # Set Highlight Grid Size
         session.set_offsets(offset_tracks, offset_scenes) 
 
-        # Configure navigation buttons
-        right_button = ButtonElement(is_momentary, MIDI_NOTE_TYPE, CHANNEL, right_button_NOTE)
-        left_button = ButtonElement(is_momentary, MIDI_NOTE_TYPE, CHANNEL, left_button_NOTE)
-        up_button = ButtonElement(is_momentary, MIDI_NOTE_TYPE, CHANNEL, up_button_NOTE)
-        down_button = ButtonElement(is_momentary, MIDI_NOTE_TYPE, CHANNEL, down_button_NOTE)
+        # SESSION NAVIGATION BUTTONS
+        right_button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, right_button_CC)
+        left_button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, left_button_CC)
         right_button.name = 'Bank_Select_Right_Button'
         left_button.name = 'Bank_Select_Left_Button'
+        session.set_track_bank_buttons(right_button, left_button)
+        up_button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, up_button_CC)
+        down_button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, down_button_CC)
         up_button.name = 'Bank_Select_Up_Button'
         down_button.name = 'Bank_Select_Down_Button'
-        session.set_track_bank_buttons(right_button, left_button)
         session.set_scene_bank_buttons(down_button, up_button)
 
-        # Configure clip launch buttons
-        matrix = ButtonMatrixElement()
-        matrix.name = 'Button_Matrix'
+        #SCENE NAVIGATION BUTTONS
+        prev_button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, left_select_CC)
+        next_button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, right_select_CC)
+        next_button.name = 'Next_Select_Button'
+        prev_button.name = 'Prev_Select__Button'
+        session.set_select_buttons(next_button, prev_button)
         
-        for scene_index in range(num_scenes):
-            scene = session.scene(scene_index)
-            scene.name = 'Scene_' + str(scene_index)
-            button_row = []
-            for track_index in range(num_tracks):
-                button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, clip_CCs[scene_index][track_index])
-                button.name = str(track_index) + '_Clip_' + str(scene_index) + '_Button'
-                button_row.append(button)
-                clip_slot = scene.clip_slot(track_index)
-                clip_slot.name = str(track_index) + '_Clip_Slot_' + str(scene_index)
-                clip_slot.set_launch_button(button)
-            matrix.add_row(tuple(button_row))
+        #STOP ALL CLIP BUTTON
+        stop_all_button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, stop_all_clips_CC)
+        stop_all_button.name = 'Stop_All_Button'
+        session.set_stop_all_clips_button(stop_all_button)
+
+        #SCENE LAUCH BUTTONS
+        scene_launch_buttons = [ ButtonElement(True, MIDI_CC_TYPE, CHANNEL, scene_launch_column_CCs[index]) for index in xrange(num_scenes) ]
+        scene_launch_buttons = ButtonMatrixElement(name='Scene_Launch_Buttons', rows=[scene_launch_buttons])
+        session.set_scene_launch_buttons(scene_launch_buttons)
+        
+        #CLIP STOP BUTTONS
+        scene_stop_buttons = [ ButtonElement(True, MIDI_CC_TYPE, CHANNEL, clip_stop_row_CCs[index]) for index in xrange(num_tracks) ]
+        scene_stop_buttons = ButtonMatrixElement(name='Scene_Stop_Buttons', rows=[scene_stop_buttons])          
+        session.set_stop_track_clip_buttons(scene_stop_buttons)
+                
+        #CLIP LAUCH BUTTONS
+        matrix = ButtonMatrixElement(name='Button_Matrix')
+        for scene_index in xrange(num_scenes):
+            row = [ ButtonElement(True, MIDI_CC_TYPE, CHANNEL, clip_CCs[scene_index][track_index]) for track_index in xrange(num_tracks) ] 
+            matrix.add_row(row)
+        session.set_clip_launch_buttons(matrix)
+        
+        
+            
         self.set_highlighting_session_component(session)
 
             
@@ -81,4 +97,3 @@ class AAAMatrix(ControlSurface):
         Live.Base.log("LOG: AAAMatrix disconnect")
         """clean things up on disconnect"""
         ControlSurface.disconnect(self)
-        return None

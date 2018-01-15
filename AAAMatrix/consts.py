@@ -10,18 +10,21 @@ CHANNEL = 0
 #####
 # Set Midi Notes that you will use for left,right,up,down navigation buttons 
   
-left_button_NOTE = 2 
-right_button_NOTE = 3 
-up_button_NOTE = 0 
-down_button_NOTE = 1 
+left_button_CC = 86 
+right_button_CC = 88 
+up_button_CC = 77 
+down_button_CC = 87 
+
+left_select_CC = 75 
+right_select_CC = 85 
 
 #####
 # Set size of red box.  Box will be X Tracks wide by X Scenes tall.  
 # If you change the box size, you will need to change the clip launch 
 # note assignments below.  
 
-num_tracks = 5 # columns
-num_scenes = 5 # rows
+num_tracks = 4 # columns
+num_scenes = 4 # rows
 
 #####
 # Set Offset of red box position to start off on a specific track or scene.  
@@ -36,11 +39,16 @@ offset_scenes = 0 # use 0 for first scene / row
 # new lines for different numbers of scenes / rows (And you must remove 
 # or add them in the next section too!).  
 
-clip_launch_row_1_CCs = [24,25,26,27,28] #row 1 note assignments
-clip_launch_row_2_CCs = [29,30,31,32,33] #row 2 note assignments       
-clip_launch_row_3_CCs = [34,35,36,37,38] #row 3 note assignments       
-clip_launch_row_4_CCs = [39,40,41,42,43] #row 3 note assignments       
-clip_launch_row_5_CCs = [44,45,46,47,48] #row 3 note assignments       
+clip_launch_row_1_CCs = [69,70,71,72] #row 1 note assignments
+clip_launch_row_2_CCs = [79,80,81,82] #row 2 note assignments       
+clip_launch_row_3_CCs = [89,90,91,92]#row 3 note assignments       
+clip_launch_row_4_CCs = [99,100,101,102] #row 4 note assignments       
+
+
+clip_stop_row_CCs = [109,110,111,112] #row 3 note assignments     
+stop_all_clips_CC = 113
+
+scene_launch_column_CCs = [73,83,93,103] #row 3 note assignments   
 
 #####
 # Combine the clip launch note rows into one variable.  You will need 
@@ -51,5 +59,4 @@ clip_launch_row_5_CCs = [44,45,46,47,48] #row 3 note assignments
 clip_CCs = [clip_launch_row_1_CCs, 
               clip_launch_row_2_CCs, 
               clip_launch_row_3_CCs,
-              clip_launch_row_4_CCs,
-              clip_launch_row_5_CCs]
+              clip_launch_row_4_CCs]
